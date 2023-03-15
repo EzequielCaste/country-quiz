@@ -1,7 +1,8 @@
 import {useState, useEffect, useRef, SetStateAction} from 'react'
-import {Link} from 'wouter'
+import {Link, useLocation} from 'wouter'
 import capitals from '../../quiz_data.json'
 import styled from 'styled-components'
+import GameResult from '../GameResult'
 
 const Next = styled.div``
 const OPTIONS_AMOUNT = 4
@@ -38,17 +39,24 @@ const Input = styled.input`
 const Label = styled.label`
 `;
 
+const H3 = styled.h3`
+margin: 8px 0;
+`;
+
 
 const index = () => {
   const [selected, setSelected] = useState('')
   const [countries, setCountries] = useState<GData[]>([])
   const [rngNumber, setRngnNumber] = useState<number>(0)
   const [game, setGame] = useState({
-    status: 'waiting'
+    status: 'waiting',
+    score: 0
   })
   const [correctOption, setCorrectOption] = useState<GData | null>(null)
 
   const shouldGetCountry = useRef(true)
+
+  const [showResults, setShowResults] = useState(false)
 
   useEffect(() => {
     if (shouldGetCountry.current) {
@@ -75,15 +83,17 @@ const index = () => {
 
     if (answer.capital === countries[rngNumber].capital) {
       // true CORRECT
-      setGame({
-        status: 'correct'
-      })      
+      setGame(prev => ({
+        status: 'correct',
+        score: prev.score + 1
+      }))      
 
     } else {
       // false INCORRECT
-      setGame({
+      setGame(prev => ({
+        ...prev,
         status: 'incorrect'
-      })
+      }))
 
       // find the correct Country
       
@@ -92,11 +102,15 @@ const index = () => {
   }
 
   function handleNext() {
-    console.log('handle next')
-    getRandomCountry(setCountries)
-    setGame({
-      status: 'waiting'
-    })
+    if (game.status === 'incorrect') {
+      setShowResults(true)
+    } else {
+      getRandomCountry(setCountries)
+      setGame(prev => ({
+        ...prev,
+        status: 'waiting'      
+      }))
+    }
   }
 
   const labelColor = (option: string) => {
@@ -111,13 +125,17 @@ const index = () => {
       default:
         return ''
     }
-  } 
+  }
+  
+  if (showResults) {
+    return <GameResult score={game.score} />
+  }
 
   return (
     <div>
       {/* Capital Header */}
       <h2>Capital Game</h2>
-      <h1>{countries[rngNumber].capital} is the capital of</h1>
+      <H3>{countries[rngNumber].capital} is the capital of</H3>
       {/* map options */}
       {
         countries.map(option => (
@@ -132,11 +150,9 @@ const index = () => {
             disabled={game.status !== 'waiting'}
           />
           <Label
-            id={option.name}   
+            id={option.name}
             style={{
-              backgroundColor: `${labelColor(option.name)}
-              
-              `
+              backgroundColor: `${labelColor(option.name)}`
             }}
             htmlFor={option.name}
           >
@@ -145,7 +161,12 @@ const index = () => {
           </Option>
         ))
       }
-      <Next onClick={handleNext}>Next</Next>
+      
+      {
+        game.status !== 'waiting' && <Next onClick={handleNext}>Next</Next>
+      }
+      
+      <Link href='/'>Back</Link>
     </div>
   )
 }
