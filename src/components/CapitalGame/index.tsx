@@ -1,30 +1,19 @@
-import {useState, useEffect, useRef, SetStateAction} from 'react'
-import {Link, useLocation} from 'wouter'
-import capitals from '../../quiz_data.json'
+import {useState, useEffect, useRef} from 'react'
+import {Link} from 'wouter'
 import styled from 'styled-components'
+// components
 import GameResult from '../GameResult'
+// types
+import { GData } from '../../types'
+// data (replace when doing actual FETCH)
+import capitals from '../../quiz_data.json'
+// helper function
+import { getRandomData, pickRandom } from '../../utils/helpers'
 
 const Next = styled.div``
-const OPTIONS_AMOUNT = 4
 
 // filter countries without a Capital
 const filteredData = capitals.filter((e) => e.capital)
-
-function getRandomCountry(callbackFn: React.Dispatch<SetStateAction<GData[]>>) {
-  // shuffle the countries in random order
-  const shuffledData = filteredData.sort(() => 0.5 - Math.random())
-  // grab 4 countries for the game
-  const countries = shuffledData.splice(55, OPTIONS_AMOUNT)
-  callbackFn(countries)
-  return
-}
-
-interface GData {
-  name: string
-  capital?: string
-  independent: boolean
-  flag: string
-}
 
 const Option = styled.div`
   margin-bottom: 1rem;
@@ -44,7 +33,7 @@ margin: 8px 0;
 `;
 
 
-const index = () => {
+const CapitalGame = () => {
   const [selected, setSelected] = useState('')
   const [countries, setCountries] = useState<GData[]>([])
   const [rngNumber, setRngnNumber] = useState<number>(0)
@@ -63,10 +52,10 @@ const index = () => {
       shouldGetCountry.current = false
 
       // list of countries
-      getRandomCountry(setCountries)
+      getRandomData(setCountries, filteredData)
       // pick one random correct answer
-      const randomNumber = Math.floor(Math.random() * OPTIONS_AMOUNT)
-      setRngnNumber(randomNumber)
+      pickRandom(setRngnNumber)
+      
     }
   }, [])
 
@@ -105,7 +94,7 @@ const index = () => {
     if (game.status === 'incorrect') {
       setShowResults(true)
     } else {
-      getRandomCountry(setCountries)
+      getRandomData(setCountries, filteredData)
       setGame(prev => ({
         ...prev,
         status: 'waiting'      
@@ -128,7 +117,7 @@ const index = () => {
   }
   
   if (showResults) {
-    return <GameResult score={game.score} />
+    return <GameResult game='capital' score={game.score} />
   }
 
   return (
@@ -161,7 +150,7 @@ const index = () => {
           </Option>
         ))
       }
-      
+
       {
         game.status !== 'waiting' && <Next onClick={handleNext}>Next</Next>
       }
@@ -171,4 +160,4 @@ const index = () => {
   )
 }
 
-export default index
+export default CapitalGame

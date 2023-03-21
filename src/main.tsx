@@ -5,7 +5,6 @@ import {Route} from 'wouter'
 
 import CapitalGame from './components/CapitalGame'
 import FlagGame from './components/FlagGame'
-import GameResult from './components/GameResult'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
@@ -13,6 +12,5 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <Route path="/" component={QuizApp} />    
     <Route path="/capital" component={CapitalGame} />
     <Route path="/flag" component={FlagGame} />
-    <Route path="/results" component={GameResult} />
   </React.StrictMode>
 )
